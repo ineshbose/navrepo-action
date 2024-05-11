@@ -1,0 +1,39 @@
+name: "Navrepo Action"
+description: "This action adds repositories under another one"
+
+inputs:
+  query:
+    description: "Query to fetch the list of repositories to clone"
+    required: true
+  account_name:
+    description: "Account under which repositories to query"
+    default: ${{ github.repository_owner }}
+  query_fields:
+    description: "Fields in the JSON query"
+    default: id,name,createdAt,isFork,parent,url
+  commit:
+    description: "Commit to the repository"
+    default: true
+  GH_TOKEN:
+    description: "GitHub token"
+    default: ${{ github.token }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Clone
+      shell: bash
+      run: ${{ github.action_path }}/clone.sh
+      env:
+        OWNER: ${{ inputs.account_name }}
+        QUERY: ${{ inputs.query }}
+        QUERY_FIELDS: ${{ inputs.query_fields }}
+        GH_TOKEN: ${{ inputs.GH_TOKEN }}
+
+    - name: Commit
+      if: ${{ inputs.commit }}
+      uses: stefanzweifel/git-auto-commit-action@v5
+
+branding:
+  icon: "external-link"
+  color: blue
